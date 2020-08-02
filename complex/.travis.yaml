@@ -1,0 +1,38 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t yaowenqiang/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run yaowenqiang/react-test npm run test -- --coverage
+    #deploy:
+    #provider: elasticbeanstalk
+    #region: "us-west-2"
+    #app: "frontend"
+    #env: "docker-env"
+    #bucket_name: "my-bucet"
+    #bucket_name: "my-path"
+    #on:
+    #    branch: master
+    #access_key_id: $aws_access_key
+    #secrect-access-key:
+    #source: viue
+after_success:
+  - docker build -t yaowenqiang/multi-react-clcient -f ./client/Dockerfile ./client
+  - docker build -t yaowenqiang/multi-react-server -f ./server/Dockerfile ./server
+  - docker build -t yaowenqiang/multi-react-nginx -f ./nginx/Dockerfile ./nginx
+  - docker build -t yaowenqiang/multi-react-worker -f ./worker/Dockerfile ./worker
+  # config environment variable on the travis project settings
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push yaowenqiang/multi-react-clcient
+  - docker push yaowenqiang/multi-react-server
+  - docker push yaowenqiang/multi-react-nginx
+  - docker push yaowenqiang/multi-react-worker
+
+
+
+
+
+         
+
+
